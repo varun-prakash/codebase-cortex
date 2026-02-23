@@ -1,15 +1,26 @@
-import { getCollection } from "../retriever/chroma";
-import { embed } from "../llm/embeddings";
-import { randomUUID } from "crypto";
+import { getFiles, readFile } from "./files";
+import { chunkText } from "./chunk";
+import { indexText } from "./store";
+import { Collection } from "chromadb";
 
-export async function indexText(text: string, metadata = {}) {
-  const collection = await getCollection();
-  const vector = await embed(text);
+export async function indexDirectory(root: string, collection: Collection) {
+  const files = await getFiles(root);
 
-  await collection.add({
-    ids: [randomUUID()],
-    embeddings: [vector],
-    documents: [text],
-    metadatas: [metadata],
-  });
+  console.log(`Found ${files.length} files`);
+
+  for (const file of files) {
+    const content = await readFile(file);
+    const chunks = chunkText(content);
+
+    console.log(`Indexing ${file} (${chunks.length} chunks)`);
+
+    for (let i = 0; i < chunks.length; i++) {
+      await indexText(chunks[i], collection, {
+        path: file,
+        chunk: i,
+      });
+    }
+  }
+
+  console.log("Indexing complete");
 }

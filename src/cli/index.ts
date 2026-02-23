@@ -2,7 +2,10 @@
 
 import { Command } from "commander";
 import { queryOllama } from "../llm/ollama";
-import { indexText } from "../indexer";
+import { indexDirectory } from "../indexer";
+import { recreateCollection } from "../retriever/chroma";
+
+const collection = recreateCollection();
 
 const program = new Command();
 
@@ -15,10 +18,7 @@ program
   .command("index")
   .argument("<path>")
   .action(async (path) => {
-    await indexText("Dependency injection is used in the auth module", {
-      path,
-    });
-    console.log("Indexed sample text");
+    await indexDirectory("./src", await collection);
   });
 
 program
