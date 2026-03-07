@@ -14,7 +14,7 @@ async function main() {
 
   const store = new InMemoryVectorStore();
   for (const c of chunks) {
-    const er = chunkToEmbeddingRecord(c);
+    const er = await chunkToEmbeddingRecord(c);
     store.add(er);
   }
 

@@ -29,7 +29,7 @@ export function parseFileToSymbols(filePath: string): SymbolChunk[] {
       const source = sliceSourceByLines(text, startLine, endLine)
       const name = node.name.getText()
       const id = `${filePath}:${name}:${startLine}`
-      chunks.push({ id, symbolName: name, filePath, source, startLine, endLine, parent: null })
+      chunks.push({ id, symbolName: name, filePath, source, startLine, endLine, parent: null, type: 'function' })
     }
 
     if (ts.isClassDeclaration(node) && node.name) {
@@ -37,7 +37,7 @@ export function parseFileToSymbols(filePath: string): SymbolChunk[] {
       const { startLine, endLine } = lineRangeFromNode(sf, node)
       const source = sliceSourceByLines(text, startLine, endLine)
       const id = `${filePath}:class:${className}:${startLine}`
-      chunks.push({ id, symbolName: className, filePath, source, startLine, endLine, parent: null })
+      chunks.push({ id, symbolName: className, filePath, source, startLine, endLine, parent: null, type: 'class' })
 
       // collect methods as separate chunks
       node.members.forEach((m) => {
@@ -46,7 +46,7 @@ export function parseFileToSymbols(filePath: string): SymbolChunk[] {
           const { startLine: ms, endLine: me } = lineRangeFromNode(sf, m)
           const msource = sliceSourceByLines(text, ms, me)
           const mid = `${filePath}:method:${className}.${methodName}:${ms}`
-          chunks.push({ id: mid, symbolName: methodName, filePath, source: msource, startLine: ms, endLine: me, parent: className })
+          chunks.push({ id: mid, symbolName: methodName, filePath, source: msource, startLine: ms, endLine: me, parent: className, type: 'method' })
         }
       })
     }
@@ -56,7 +56,7 @@ export function parseFileToSymbols(filePath: string): SymbolChunk[] {
       const { startLine, endLine } = lineRangeFromNode(sf, node)
       const source = sliceSourceByLines(text, startLine, endLine)
       const id = `${filePath}:interface:${name}:${startLine}`
-      chunks.push({ id, symbolName: name, filePath, source, startLine, endLine, parent: null })
+      chunks.push({ id, symbolName: name, filePath, source, startLine, endLine, parent: null, type: 'interface' })
     }
 
     ts.forEachChild(node, (n) => visit(n, parentName))

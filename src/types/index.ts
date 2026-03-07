@@ -6,6 +6,7 @@ export interface SymbolChunk {
   startLine: number
   endLine: number
   parent?: string | null
+  type?: 'function' | 'class' | 'method' | 'interface'
 }
 
 export interface EmbeddingRecord {
@@ -18,6 +19,7 @@ export interface EmbeddingRecord {
     startLine: number
     endLine: number
     parent?: string | null
+    type?: 'function' | 'class' | 'method' | 'interface'
   }
 }
 

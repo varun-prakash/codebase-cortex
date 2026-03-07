@@ -10,23 +10,33 @@ const MODEL = "deepseek-coder:latest";
 
 export class OllamaProvider implements LLMProvider {
   async refine(groundedAnswer: string, context: string): Promise<string> {
-    const prompt = `You are a technical documentation writer. Your task is to refine and expand the following grounded answer into a natural, narrative explanation. Use the provided code context to support your explanation with inline citations.
+    const prompt = `You are a code documentation expert. Your ONLY task is to improve the readability and flow of the provided grounded answer using the code context. You are NOT allowed to add new facts or speculate.
 
-IMPORTANT RULES:
-- Keep all facts from the grounded answer (do not invent new information)
-- Use the code context provided to explain implementation details
-- Add inline citations like [file.ts:line] for code references
-- Do NOT speculate about functionality not visible in the provided code
-- Make the narrative flow naturally while staying grounded in the code
-- Output should be 2-4 paragraphs, not a bullet list
+STRICT RULES (MUST FOLLOW):
+1. Every claim must be directly supported by the code context provided below
+2. Add inline citations like [file.ts:lines] for ALL code references
+3. If the answer says something is in the context, verify it exists in the provided code
+4. Do NOT add features, behaviors, or details not visible in the code
+5. Do NOT explain 'why' something was designed a certain way unless the code contains comments explaining it
+6. If you cannot verify a claim in the provided code, remove or rephrase it to be factually accurate
+7. Output ONLY the refined answer with citations - do NOT add meta-commentary or explanations
 
-Grounded Answer:
+FACT-CHECKING INSTRUCTIONS:
+- Before including any claim, check if it appears in the code context
+- Use exact line numbers from the code context when citing
+- If a function/class name doesn't appear in code, don't mention it
+- If you're unsure, default to the original grounded answer
+
+CITATION FORMAT:
+Use [filename:line-range] format, e.g., [indexer.ts:15-20] or [parser.ts:42]
+
+Grounded Answer (to improve):
 ${groundedAnswer}
 
-Code Context (for reference):
+Code Context (source of truth):
 ${context}
 
-Now provide a refined, narrative explanation with citations:`;
+Now provide the refined answer with proper citations. Only rewrite for clarity and flow - do NOT add new information:`;
 
     try {
       const response = await axios.post(OLLAMA_URL, {

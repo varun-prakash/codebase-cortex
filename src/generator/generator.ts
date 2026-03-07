@@ -1,5 +1,5 @@
 import { InMemoryVectorStore } from '../retriever/vectorStore'
-import { embedTextDeterministic, chunkToEmbeddingRecord } from '../embeddings/embeddings'
+import { embedTextDeterministic, chunkToEmbeddingRecord, embedTextOllama } from '../embeddings/embeddings'
 import { RetrievalResult } from '../types'
 import { AnswerRefiner, RefinerOptions } from './refiner'
 
@@ -27,8 +27,8 @@ export async function generateAnswerFromQueryAsync(
   const topK = opts.topK ?? 5
   const minScore = opts.minScore ?? 0.02
 
-  // deterministic query embedding
-  const qemb = embedTextDeterministic(query)
+  // Use semantic embeddings from Ollama (with fallback to deterministic)
+  const qemb = await embedTextOllama(query)
   const results: RetrievalResult[] = store.retrieveWithQueryText(query, qemb, { topK, keywordBoost: opts.keywordBoost })
 
   if (debug) {
